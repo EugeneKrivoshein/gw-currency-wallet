@@ -8,10 +8,8 @@ import (
 func RegisterRoutes(router *gin.Engine, storage storages.Storage) {
 	authHandler := NewAuthHandler(storage)
 
-	auth := router.Group("/auth")
-	{
-		auth.POST("/api/v1/register", authHandler.Register)
-		auth.POST("/api/v1/login", authHandler.Login)
-		auth.POST("/api/v1/logout", authHandler.Logout) // Добавлен маршрут для логаута
-	}
+	router.POST("/api/v1/register", authHandler.Register)
+	router.POST("/api/v1/login", authHandler.Login)
+	router.POST("/api/v1/logout", authHandler.Logout)
+
 }

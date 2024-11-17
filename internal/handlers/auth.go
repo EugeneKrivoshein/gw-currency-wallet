@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/EugeneKrivoshein/gw-currency-wallet/internal/storages"
 	"github.com/EugeneKrivoshein/gw-currency-wallet/pkg"
@@ -20,6 +21,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	var req struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
+		Email    string `json:"email"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -27,8 +29,14 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	err := h.storage.RegisterUser(req.Username, req.Password)
+	err := h.storage.RegisterUser(req.Username, req.Password, req.Email)
 	if err != nil {
+		// Если ошибка связана с дублированием ключа (username или email)
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Username or email already exists"})
+			return
+		}
+		// Если другая ошибка, возвращаем 500
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -49,7 +57,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	valid, err := h.storage.AuthenticateUser(req.Username, req.Password)
 	if err != nil || !valid {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
 

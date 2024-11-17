@@ -12,30 +12,24 @@ type PostgresStorage struct {
 	db *sql.DB
 }
 
-// Конструктор для создания нового хранилища
 func NewPostgresStorage(provider *PostgresProvider) *PostgresStorage {
 	return &PostgresStorage{db: provider.db}
 }
 
-// Пример метода для регистрации пользователя
-func (ps *PostgresStorage) RegisterUser(username, password string) error {
-	// Генерация хеша пароля
+func (ps *PostgresStorage) RegisterUser(username, password, email string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	// Вставка нового пользователя в таблицу
-	query := `INSERT INTO users (username, password) VALUES ($1, $2)`
-	_, err = ps.db.Exec(query, username, hash)
+	query := `INSERT INTO users (username, password, email) VALUES ($1, $2, $3)`
+	_, err = ps.db.Exec(query, username, hash, email)
 	return err
 }
 
-// Аутентификация пользователя
 func (ps *PostgresStorage) AuthenticateUser(username, password string) (bool, error) {
 	var storedHash string
 
-	// Получаем хеш пароля из базы данных
 	query := `SELECT password FROM users WHERE username = $1`
 	err := ps.db.QueryRow(query, username).Scan(&storedHash)
 	if err != nil {
@@ -47,8 +41,8 @@ func (ps *PostgresStorage) AuthenticateUser(username, password string) (bool, er
 
 	// Сравниваем хеш пароля
 	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password)); err != nil {
-		return false, nil // Неверный пароль
+		return false, nil
 	}
 
-	return true, nil // Успешная аутентификация
+	return true, nil
 }

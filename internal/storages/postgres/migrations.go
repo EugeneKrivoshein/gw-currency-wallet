@@ -10,7 +10,8 @@ func RunMigrations(db *sql.DB) error {
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+		email VARCHAR(255) UNIQUE
     );
     `
 	if _, err := db.Exec(query); err != nil {

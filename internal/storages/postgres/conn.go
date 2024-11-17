@@ -7,12 +7,10 @@ import (
 	"github.com/EugeneKrivoshein/gw-currency-wallet/internal/config"
 )
 
-// Структура для работы с базой данных PostgreSQL
 type PostgresProvider struct {
 	db *sql.DB
 }
 
-// Конструктор для создания нового провайдера PostgreSQL
 func NewPostgresProvider(cfg *config.Config) (*PostgresProvider, error) {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
@@ -29,12 +27,10 @@ func NewPostgresProvider(cfg *config.Config) (*PostgresProvider, error) {
 	return &PostgresProvider{db: db}, nil
 }
 
-// Метод для закрытия подключения
 func (p *PostgresProvider) Close() error {
 	return p.db.Close()
 }
 
-// Метод для получения объекта *sql.DB
 func (p *PostgresProvider) DB() *sql.DB {
 	return p.db
 }
