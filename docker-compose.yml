@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: myapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+    container_name: app_container
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./config.env
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
